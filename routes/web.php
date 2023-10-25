@@ -2,8 +2,6 @@
 
 use Illuminate\Support\Facades\Route;
 
-use App\Http\Controllers\HomeController;
-
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -16,10 +14,11 @@ use App\Http\Controllers\HomeController;
 */
 
 Route::get('/', function () {
-    return view('welcome');
+    return view('login');
 });
 
-Route::get('/home', [HomeController::class, 'index']);
+Route::post('/login', [App\Http\Controllers\AuthController::class, 'login']);
+Route::get('/home', [App\Http\Controllers\HomeController::class, 'index']);
 
 Route::resource('orders', App\Http\Controllers\OrderController::class);
 Route::resource('sales', App\Http\Controllers\SaleController::class);

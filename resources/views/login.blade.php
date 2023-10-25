@@ -22,11 +22,19 @@
             }
 
             .login-form-section {
-                background: #262626;
+                background: #393c44;
                 height: 100vh;
                 color: #ffffff;
-                padding-left: 25px;
-                padding-right: 25px;
+            }
+
+            .brand {
+                background: #000000;
+                height: 10vh;
+            }
+
+            .col2-header {
+                background: #e5e5e5;
+                height: 10vh;
             }
 
             label {
@@ -41,14 +49,17 @@
                 -moz-border-radius: 0 !important;
                 border-radius: 0 !important;
             }
+
+            .form-group {
+                margin-left: 15px;
+                margin-right: 15px;
+            }
         </style>
     </head>
     <body class="antialiased">
         <div class="row">
             <div class="col-md-6 login-form-section">
-                <br>
-                <br>
-                <br>
+                <div class="row brand"></div>
                 <br>
                 <br>
                 <br>
@@ -64,51 +75,33 @@
                     <input class="form-control input-lg" type="password" name="password">
                 </div>
                 <br>
-                <div>
+                <div class="form-group">
                     <button class="btn btn-primary rounded-0 btn-lg" id="btn-login">Login</button>
                 </div>
             </div>
             <div class="col-md-6">
+                <div class="row col2-header"></div>
                 <br>
                 <br>
                 <br>
-                <br>
-                <br>
-                <iframe width="98%" height="400" src="https://www.youtube.com/embed/_UORzUfKR2c?si=cLZ1q9wnjbmFNog5&amp;controls=0" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+                <!-- <iframe width="98%" height="400" src="https://www.youtube.com/embed/_UORzUfKR2c?si=cLZ1q9wnjbmFNog5&amp;controls=0" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe> -->
             </div>
         </div>
     </body>
 </html>
 <script type="text/javascript">
 $(document).ready(function(){
-    let searchParams = new URLSearchParams(window.location.search);
-
-    var access_type = null;
-    var brand_id = "f6f2202a-6d82-11ee-91c0-0242ac120005";
-    var SIGNIN_ENDPOINT = 'http://localhost/api/login';
-
-    if (searchParams.has('access')) {
-        access_type = searchParams.get('access');
-    }
-
-    if (searchParams.has('brand')) {
-        brand_id = searchParams.get('brand');
-    }
-
-    if (brand_id == null) {
-        window.location.href = "404.html";
-    }
 
     $("#btn-login").click(function(){
         var has_error = false;
 
         if ($("input[name='email']").val() == '') {
-            $("input[name='email']").css('border-bottom', '1px solid red');
+            $("input[name='email']").css('border-bottom', '3px solid red');
             has_error = true;
         }
 
         if ($("input[name='password']").val() == '') {
-            $("input[name='password']").css('border-bottom', '1px solid red');
+            $("input[name='password']").css('border-bottom', '3px solid red');
             has_error = true;
         }
 
@@ -116,23 +109,29 @@ $(document).ready(function(){
 
         $.ajax({
             type: 'POST',   
-            url: SIGNIN_ENDPOINT,
+            url: "/login",
             headers: {
                 'Accept': 'application/json'
             },
-            dataType: "json",
             data:   
             {
+                "_token": "{{ csrf_token() }}",
                 "email":$("input[name='email']").val(),
-                "password":$("input[name='password']").val(),
-                "access_type":access_type,
-                "brand_id":brand_id
+                "password":$("input[name='password']").val()
             },
-            success: function (data) {
-                console.log(data.token);
-                window.location.href = "/home";
+            success: function (response) {
+                if (response.success) { window.location.href = "/home" }
+
+                if (!response.success) { 
+                    $("input[name='email']").css('border-bottom', '3px solid red');
+                    $("input[name='password']").css('border-bottom', '3px solid red');
+
+                    has_error = true;
+
+                    $("#btn-login").effect("shake") 
+                }
             },
-            error: function (data) {
+            error: function (response) {
                 $("#btn-login").effect("shake");
             }
         });

@@ -1,5 +1,5 @@
 services:
-    laravel.test:
+    client:
         build:
             context: ./vendor/laravel/sail/runtimes/8.2
             dockerfile: Dockerfile
@@ -20,7 +20,7 @@ services:
         volumes:
             - '.:/var/www/html'
         networks:
-            - sail
+            - junrhycrodua-api_local-network
         depends_on:
             - redis
     redis:
@@ -30,7 +30,7 @@ services:
         volumes:
             - 'sail-redis:/data'
         networks:
-            - sail
+            - junrhycrodua-api_local-network
         healthcheck:
             test:
                 - CMD
@@ -39,8 +39,8 @@ services:
             retries: 3
             timeout: 5s
 networks:
-    sail:
-        driver: bridge
+    junrhycrodua-api_local-network:
+        external: true
 volumes:
     sail-redis:
         driver: local
