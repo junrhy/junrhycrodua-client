@@ -4,15 +4,14 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 
+
 class HomeController extends Controller
 {
     public function index(Request $request)
     {
         $template = $this->setTemplate($request);
 
-        return view($template, [
-            'user' => 'Test User Variable'
-        ]);
+        return view($template);
     }
 
     private function setTemplate($request)

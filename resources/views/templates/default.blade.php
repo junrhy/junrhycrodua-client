@@ -1,5 +1,5 @@
 @extends('layouts.master')
 
 @section('content')
-   Welcome {{ $user }}!
+Dashboard
 @endsection

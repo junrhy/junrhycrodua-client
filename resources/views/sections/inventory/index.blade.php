@@ -12,7 +12,7 @@
    </li>
 </ul>
 
-<div class="tab-content" id="inventoryTabContent">
+<div class="tab-content mb-3" id="inventoryTabContent">
    <div class="tab-pane fade show active" id="current" role="tabpanel" aria-labelledby="current-tab">
       <div class="table-responsive mt-3">
          <table id="currentTable" class="table table-hover">
@@ -22,21 +22,15 @@
                <th scope="col">Unit</th>
             </thead>
             <tbody>
-               <tr data-id="">
-                  <td>Salt</td>
-                  <td>100</td>
-                  <td>Kilo</td>
+               @foreach (json_decode($current) as $current)
+               <tr>
+                  <td>{{ !empty($current->name) ? $current->name : '' }}</td>
+                  <td>{{ $current->qty }}</td>
+                  <td>
+                     {{ $current->qty > 1 ? \Illuminate\Support\Str::plural($current->unit) : $current->unit }}
+                  </td>
                </tr>
-               <tr data-id="">
-                  <td>Sugar</td>
-                  <td>100</td>
-                  <td>Kilo</td>
-               </tr>
-               <tr data-id="">
-                  <td>Rice</td>
-                  <td>100</td>
-                  <td>Kilo</td>
-               </tr>
+               @endforeach
             </tbody>
          </table>
       </div>
@@ -53,27 +47,17 @@
                <th scope="col">Date</th>
             </thead>
             <tbody>
+               @foreach (json_decode($transactions) as $transaction)
                <tr data-id="">
-                  <td>Salt</td>
-                  <td>1</td>
-                  <td>Kilo</td>
-                  <td>Out</td>
-                  <td>Jan 10, 2023 10:00am</td>
+                  <td>{{ !empty($transaction->item->name) ? $transaction->item->name : '' }}</td>
+                  <td>{{ $transaction->qty }}</td>
+                  <td>
+                     {{ $transaction->qty > 1 ? \Illuminate\Support\Str::plural($transaction->unit) : $transaction->unit }}
+                  </td>
+                  <td>{{ $transaction->operator == '+' ? 'IN' : 'OUT' }}</td>
+                  <td>{{ date('M d, Y h:ia', strtotime($transaction->created_at)) }}</td>
                </tr>
-               <tr data-id="">
-                  <td>Salt</td>
-                  <td>1</td>
-                  <td>Kilo</td>
-                  <td>Out</td>
-                  <td>Jan 10, 2023 10:00am</td>
-               </tr>
-               <tr data-id="">
-                  <td>Salt</td>
-                  <td>1</td>
-                  <td>Kilo</td>
-                  <td>Out</td>
-                  <td>Jan 10, 2023 10:00am</td>
-               </tr>
+               @endforeach
             </tbody>
          </table>
       </div>
@@ -88,6 +72,7 @@ $(document).ready(function(){
             [ 10, 25, 50, -1 ],
             [ '10 rows', '25 rows', '50 rows', 'Show all' ]
          ],
+         order: [[0, 'asc']],
          buttons: [
             'pageLength', 
             {
@@ -131,6 +116,7 @@ $(document).ready(function(){
             [ 10, 25, 50, -1 ],
             [ '10 rows', '25 rows', '50 rows', 'Show all' ]
          ],
+         order: [[4, 'desc']],
          buttons: [
             {
                 extend: 'collection',

@@ -4,7 +4,6 @@
    
    <h1 class="mt-3 mb-3 border-bottom border-info">Orders</h1>
    <button type="button" class="btn btn-primary rounded-0" data-toggle="modal" data-target="#orderModal">New Order</button>
-   <!-- @include('components.modals.order.order') -->
    <div class="table-responsive">
       <table class="table table-hover">
          <thead>

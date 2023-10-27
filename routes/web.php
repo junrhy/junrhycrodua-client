@@ -2,6 +2,8 @@
 
 use Illuminate\Support\Facades\Route;
 
+use App\Http\Middleware\Auth;
+
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -18,8 +20,13 @@ Route::get('/', function () {
 });
 
 Route::post('/login', [App\Http\Controllers\AuthController::class, 'login']);
-Route::get('/home', [App\Http\Controllers\HomeController::class, 'index']);
+Route::get('/logout', [App\Http\Controllers\AuthController::class, 'logout']);
 
-Route::resource('orders', App\Http\Controllers\OrderController::class);
-Route::resource('sales', App\Http\Controllers\SaleController::class);
-Route::resource('inventories', App\Http\Controllers\InventoryController::class);
+Route::middleware([App\Http\Middleware\Auth::class])->group(function () {
+    
+    Route::get('/home', [App\Http\Controllers\HomeController::class, 'index']);
+
+    Route::resource('orders', App\Http\Controllers\OrderController::class);
+    Route::resource('sales', App\Http\Controllers\SaleController::class);
+    Route::resource('inventories', App\Http\Controllers\InventoryController::class);
+});

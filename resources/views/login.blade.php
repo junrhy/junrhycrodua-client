@@ -65,18 +65,19 @@
                 <br>
                 <br>
                 <br>
-                <div class="form-group">
-                    <label class="label">Email</label><br>
-                    <input class="form-control input-lg" type="text" name="email">
-                </div>
-                <br>
-                <div class="form-group">
-                    <label class="label">Password</label><br>
-                    <input class="form-control input-lg" type="password" name="password">
-                </div>
-                <br>
-                <div class="form-group">
-                    <button class="btn btn-primary rounded-0 btn-lg" id="btn-login">Login</button>
+                <div class="col-md-10 offset-md-1">
+                    <div class="form-group">
+                        <h3 class="h3">Member Login</h3>
+                        <input class="form-control input-lg" type="text" name="email" placeholder="Email Address">
+                    </div>
+                    <br>
+                    <div class="form-group">
+                        <input class="form-control input-lg" type="password" name="password" placeholder="Password">
+                    </div>
+                    <br>
+                    <div class="form-group">
+                        <button class="btn btn-success btn-lg" id="btn-login">LOGIN</button>
+                    </div>
                 </div>
             </div>
             <div class="col-md-6">
@@ -96,12 +97,12 @@ $(document).ready(function(){
         var has_error = false;
 
         if ($("input[name='email']").val() == '') {
-            $("input[name='email']").css('border-bottom', '3px solid red');
+            $("input[name='email']").css('border', '1px solid red');
             has_error = true;
         }
 
         if ($("input[name='password']").val() == '') {
-            $("input[name='password']").css('border-bottom', '3px solid red');
+            $("input[name='password']").css('border', '1px solid red');
             has_error = true;
         }
 
@@ -123,8 +124,8 @@ $(document).ready(function(){
                 if (response.success) { window.location.href = "/home" }
 
                 if (!response.success) { 
-                    $("input[name='email']").css('border-bottom', '3px solid red');
-                    $("input[name='password']").css('border-bottom', '3px solid red');
+                    $("input[name='email']").css('border', '1px solid red');
+                    $("input[name='password']").css('border', '1px solid red');
 
                     has_error = true;
 
@@ -132,6 +133,11 @@ $(document).ready(function(){
                 }
             },
             error: function (response) {
+                $("input[name='email']").css('border', '1px solid red');
+                $("input[name='password']").css('border', '1px solid red');
+
+                has_error = true;
+
                 $("#btn-login").effect("shake");
             }
         });
@@ -139,17 +145,17 @@ $(document).ready(function(){
 
     $("input[name='email']").on('blur', function(){
         if ($(this).val() == '') {
-            $(this).css('border-bottom', '3px solid red');
+            $(this).css('border', '1px solid red');
         } else {
-            $(this).css('border-bottom', 'none');
+            $(this).css('border', 'none');
         }
     });
 
     $("input[name='password']").on('blur', function(){
         if ($(this).val() == '') {
-            $(this).css('border-bottom', '3px solid red');
+            $(this).css('border', '1px solid red');
         } else {
-            $(this).css('border-bottom', 'none');
+            $(this).css('border', 'none');
         }
     });
 });

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Http;
 
 class InventoryController extends Controller
 {
@@ -11,10 +12,53 @@ class InventoryController extends Controller
      */
     public function index()
     {
-         $inventories = ['test'];
+        $res = Http::withHeaders([
+                    'Accept' => 'application/json'
+                ])->replaceHeaders([
+                    'Content-Type' => 'application/json'
+                ])->withToken($this->user->token)
+                ->get(env('ENDPOINT_HOST') . '/api/inventories');
+
+        $last_page = $res->json('data')['last_page'];
+
+        $current_page = 1;
+        $inventories = [];
+
+        while ($current_page < $last_page + 1) {
+            $response = Http::withHeaders([
+                        'Accept' => 'application/json'
+                    ])->replaceHeaders([
+                        'Content-Type' => 'application/json'
+                    ])->withToken($this->user->token)
+                    ->get(env('ENDPOINT_HOST') . '/api/inventories?page=' . $current_page);
+
+            foreach ($response->json('data')['data'] as $key => $value) {
+                array_push($inventories, $value);
+            }
+
+            $current_page++;
+        }
+
+        $current = [];
+        foreach ($inventories as $key => $value) {
+            $itemName = $value["item"]["name"];
+
+            if (isset($current[$itemName])) {
+                if ($value["operator"] == "+") {
+                    $current[$itemName]['qty'] += $value["qty"];
+                } else if ($value["operator"] == "-") {
+                    $current[$itemName]['qty'] -= $value["qty"];
+                }
+            } else {
+                $current[$itemName]['name'] = $value["item"]["name"];
+                $current[$itemName]['qty'] = $value["qty"];
+                $current[$itemName]['unit'] = $value["unit"];
+            }            
+        }
 
         return view('sections.inventory.index', [
-            'inventories' => $inventories
+            'current' => json_encode(array_values($current)),
+            'transactions' => json_encode($inventories)
         ]);
     }
 

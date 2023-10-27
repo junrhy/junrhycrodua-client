@@ -41,6 +41,7 @@
   <style type="text/css">
     #sidebar {
         background: #393c44;
+        height: 100vh;
     }
   </style>
 </head>
@@ -48,7 +49,9 @@
   <main class="container-fluid">
     <div class="row">
       <div id="sidebar" class="col-md-2 d-none d-lg-block">@include('components.sidebar')</div>
-      <div class="col-md-10">@yield('content')</div>
+      <div id="main" class="col-md-10">
+        <div id="content">@yield('content')</div>
+      </div>
     </div>
   </main>
 </body>
