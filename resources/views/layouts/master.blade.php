@@ -41,7 +41,7 @@
   <style type="text/css">
     #sidebar {
         background: #393c44;
-        height: 100vh;
+        min-height: 100vh;
     }
   </style>
 </head>

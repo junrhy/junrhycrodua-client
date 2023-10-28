@@ -1,16 +1,15 @@
 <style type="text/css">
   .logo {
-    height: 15vh;
+    height: 10vh;
   }
 
   .navs, .footer {
     color: #cccccc;
-    font-size: 14pt;
-    position: fixed;
+    font-size: 16pt;
   }
 
   .footer {
-    bottom: 3em;
+    margin-top: 250px;
   }
 
   .navs a, .footer a {
@@ -23,16 +22,8 @@
     cursor: pointer;
   }
 
-  .navs {
-    height: 70vh;
-  }
-
   .nav-item {
-    margin-top: 5px;
-  }
-
-  .footer {
-    height: 14.3vh;
+    margin-top: 15px;
   }
 </style>
 <div class="row logo">
@@ -46,7 +37,7 @@
   <div class="nav-item"><i class="fa fa-box"></i> <a href="/inventories">Inventory</a></div>
 </div>
 <div class="footer">
-  <div><i class="fa fa-user"></i> <span id="profile">Profile</span></div>
-  <div><i class="fa fa-question"></i> <span id="help">Help</span></div>
-  <div><i class="fa fa-arrow-right"></i> <a href="/logout">Logout</a></div>
+  <div class="nav-item"><i class="fa fa-user"></i> <span id="profile">Profile</span></div>
+  <div class="nav-item"><i class="fa fa-question"></i> <span id="help">Help</span></div>
+  <div class="nav-item"><i class="fa fa-arrow-right"></i> <a href="/logout">Logout</a></div>
 </div>

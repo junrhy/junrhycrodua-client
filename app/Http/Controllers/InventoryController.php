@@ -62,44 +62,46 @@ class InventoryController extends Controller
         ]);
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
-    }
 
     /**
      * Store a newly created resource in storage.
      */
     public function store(Request $request)
     {
-        //
-    }
+        $params = [
+            "user_id" => $this->user->id,
+            "name" => ucfirst($request->name)
+        ];
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
-    {
-        //
-    }
+        $response = Http::withHeaders([
+                        'Accept' => 'application/json'
+                    ])->replaceHeaders([
+                        'Content-Type' => 'application/json'
+                    ])->withBody(
+                        json_encode($params)
+                    )->withToken($this->user->token)
+                    ->post(env('ENDPOINT_HOST') . '/api/items');
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
-    {
-        //
-    }
+        if ($response->json('success')) {
+            unset($params);
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
-    {
-        //
+            $params = [
+                "item_id" => $response->json('data')['id'],
+                "qty" => $request->qty,
+                "unit" => ucfirst($request->unit),
+                "operator" => "+"
+            ];
+
+            unset($response);
+            $response = Http::withHeaders([
+                        'Accept' => 'application/json'
+                    ])->replaceHeaders([
+                        'Content-Type' => 'application/json'
+                    ])->withBody(
+                        json_encode($params)
+                    )->withToken($this->user->token)
+                    ->post(env('ENDPOINT_HOST') . '/api/inventories');
+        }
     }
 
     /**
@@ -107,6 +109,11 @@ class InventoryController extends Controller
      */
     public function destroy(string $id)
     {
-        //
+        $response = Http::withHeaders([
+                        'Accept' => 'application/json'
+                    ])->replaceHeaders([
+                        'Content-Type' => 'application/json'
+                    ])->withToken($this->user->token)
+                    ->delete(env('ENDPOINT_HOST') . '/api/inventories/' . $id);
     }
 }

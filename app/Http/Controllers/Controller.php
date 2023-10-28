@@ -17,6 +17,7 @@ class Controller extends BaseController
     public function __construct()
     {
         $this->user = (object) [
+            'id' => Redis::get('current_user:id'),
             'name' => Redis::get('current_user:name'),
             'token' => Redis::get('current_user:token')
         ];

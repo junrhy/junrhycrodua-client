@@ -1,7 +1,7 @@
 @extends('layouts.master')
 
 @section('content')
-<h1 class="mt-3 mb-3 border-bottom border-info">Inventory</h1>
+<h1 class="border-bottom border-success border-3">Inventory</h1>
 
 <ul class="nav nav-tabs mb-3" id="inventoryTab" role="tablist">
    <li class="nav-item" role="presentation">
@@ -12,18 +12,22 @@
    </li>
 </ul>
 
-<div class="tab-content mb-3" id="inventoryTabContent">
+<div class="tab-content" id="inventoryTabContent">
    <div class="tab-pane fade show active" id="current" role="tabpanel" aria-labelledby="current-tab">
-      <div class="table-responsive mt-3">
-         <table id="currentTable" class="table table-hover">
+      <div class="table-responsive">
+         <table id="currentTable" class="stripe hover">
             <thead>
-               <th scope="col">Item</th>
-               <th scope="col">Qty</th>
-               <th scope="col">Unit</th>
+               <tr>
+                  <th width="5%"></th>
+                  <th>Item</th>
+                  <th>Qty</th>
+                  <th>Unit</th>
+               </tr>
             </thead>
             <tbody>
                @foreach (json_decode($current) as $current)
                <tr>
+                  <td></td>
                   <td>{{ !empty($current->name) ? $current->name : '' }}</td>
                   <td>{{ $current->qty }}</td>
                   <td>
@@ -37,21 +41,22 @@
    </div>
 
    <div class="tab-pane fade" id="transaction" role="tabpanel" aria-labelledby="transaction-tab">
-      <div class="table-responsive mt-3">
-         <table id="transactionTable" class="table table-hover">
+      <div class="table-responsive">
+         <table id="transactionTable" class="stripe hover">
             <thead>
-               <th scope="col">Item</th>
-               <th scope="col">Qty</th>
-               <th scope="col">Unit</th>
-               <th scope="col">Status</th>
-               <th scope="col">Date</th>
+               <tr>
+                  <th>Item</th>
+                  <th>Qty</th>
+                  <th>Status</th>
+                  <th>Date</th>
+               </tr>
             </thead>
             <tbody>
                @foreach (json_decode($transactions) as $transaction)
-               <tr data-id="">
+               <tr data-id="{{ $transaction->id }}">
                   <td>{{ !empty($transaction->item->name) ? $transaction->item->name : '' }}</td>
-                  <td>{{ $transaction->qty }}</td>
                   <td>
+                     {{ $transaction->qty }} 
                      {{ $transaction->qty > 1 ? \Illuminate\Support\Str::plural($transaction->unit) : $transaction->unit }}
                   </td>
                   <td>{{ $transaction->operator == '+' ? 'IN' : 'OUT' }}</td>
@@ -66,11 +71,40 @@
 
 <script type="text/javascript">
 $(document).ready(function(){
-   $('#currentTable').DataTable( {
+   $(function(){
+      let currentTab = "{{ request()->get('tab') }}";
+
+      if (currentTab != "") {
+         $(".nav-link").removeClass("active");
+         $(".tab-pane").removeClass("show active");
+
+         $("#"+currentTab+"-tab").addClass("active");
+         $("#"+currentTab).addClass("show active");
+      }
+   });
+
+   $(".nav-link").click(function(){
+      let currentTab = $(this).attr("aria-controls");
+
+      window.history.replaceState(null, null, "?tab="+currentTab);
+   });
+
+   let currentTable = $('#currentTable').DataTable( {
          dom: 'Bfrtip',
          lengthMenu: [
             [ 10, 25, 50, -1 ],
             [ '10 rows', '25 rows', '50 rows', 'Show all' ]
+         ],
+         columns: [
+            {
+               className: 'dt-control',
+               orderable: false,
+               data: null,
+               defaultContent: ''
+            },
+            { data: 'name' },
+            { data: 'qty' },
+            { data: 'unit' }
          ],
          order: [[0, 'asc']],
          buttons: [
@@ -89,9 +123,9 @@ $(document).ready(function(){
                      showCancelButton: true, 
                      confirmButtonText: 'Add',
                      html:
-                         '<input id="name" class="form-control mb-3" Placeholder="Item Name" required>' +
-                         '<input id="qty" type="number" class="form-control mb-3" Placeholder="Qty" required>' +
-                         '<input id="unit" class="form-control mb-3" Placeholder="Unit" required>',
+                         '<input id="name" class="form-control mb-3" Placeholder="Item Name" list="listid" required autocomplete="off">' +
+                         '<input id="qty" type="number" class="form-control mb-3" Placeholder="Qty" required autocomplete="off">' +
+                         '<input id="unit" class="form-control mb-3" Placeholder="Unit" required autocomplete="off">',
                      focusConfirm: false,
                      preConfirm: () => {
                       return [
@@ -102,21 +136,91 @@ $(document).ready(function(){
                      }
                      })
                      if (formValues) {
-                       Swal.fire(JSON.stringify(formValues))
+                        let name = formValues[0];
+                        let qty = formValues[1];
+                        let unit = formValues[2];
+
+                        $.ajax({
+                           type: 'POST',   
+                           url: "/inventories",
+                           data:   
+                           {
+                               "_token": "{{ csrf_token() }}",
+                               "name":name,
+                               "qty":qty,
+                               "unit":unit
+                           },
+                           success: function (response) {
+                              location.reload();
+                           },
+                           error: function (response) {
+                               
+                           }
+                        });
                      }
                      })()
                }
             }
-         ]
-    });
+         ],
+         drawCallback: function() {
+            var api = this.api();
+            var rowCount = api.rows({page: 'current'}).count();
+            
+            for (var i = 0; i < api.page.len() - (rowCount === 0? 1 : rowCount); i++) {
+              $('#currentTable tbody').append($("<tr><td>&nbsp;</td><td></td><td></td><td></td></tr>"));
+            }
+         }
+   });
 
-   $('#transactionTable').DataTable( {
+   function format(d) {
+       return (
+           '<h4>Storage Life <small class="text-secondary">'+d.name+' in '+d.unit+'</small></h4>' + 
+           '<table class="table table-sm display mb-3">' +
+           '<thead>' + 
+           '<tr>' + 
+           '<th class="bg-light">No. of days</th>' + 
+           '<th class="bg-success text-white">0 - 90</th>' + 
+           '<th class="bg-success text-white">91 - 180</th>' + 
+           '<th class="bg-warning">181 - 270</th>' + 
+           '<th class="bg-warning">271 - 360</th>' + 
+           '<th class="bg-warning">360+</th>' + 
+           '<th class="bg-danger text-white">Expired</th>' + 
+           '</tr>' +
+           '</thead>' + 
+           '<tbody class="bg-light">' + 
+           '<tr>' +
+           '<td>No. of items</td>' + 
+           '<td>0</td>' + 
+           '<td>0</td>' + 
+           '<td>0</td>' + 
+           '<td>0</td>' + 
+           '<td>0</td>' + 
+           '<td>0</td>' + 
+           '</tr>' +
+           '</tbody>' + 
+           '</table>'
+       );
+   }
+
+   currentTable.on('click', 'td.dt-control', function (e) {
+       let tr = e.target.closest('tr');
+       let row = currentTable.row(tr);
+    
+       if (row.child.isShown()) {
+           row.child.hide();
+       }
+       else {
+           row.child(format(row.data())).show();
+       }
+   });
+
+   var transactionTable = $('#transactionTable').DataTable( {
          dom: 'Bfrtip',
          lengthMenu: [
             [ 10, 25, 50, -1 ],
             [ '10 rows', '25 rows', '50 rows', 'Show all' ]
          ],
-         order: [[4, 'desc']],
+         order: [[3, 'desc']],
          buttons: [
             {
                 extend: 'collection',
@@ -183,8 +287,83 @@ $(document).ready(function(){
                extend: 'copy',
                split: ['print', 'csv', 'excel'],
             }
-         ]
+         ],
+         drawCallback: function() {
+            var api = this.api();
+            var rowCount = api.rows({page: 'current'}).count();
+            
+            for (var i = 0; i < api.page.len() - (rowCount === 0? 1 : rowCount); i++) {
+              $('#transactionTable tbody').append($("<tr><td>&nbsp;</td><td></td><td></td><td></td></tr>"));
+            }
+         }
     });
+
+   $('#transactionTable').on('click', 'tbody tr', function () {
+      var id = $(this).data('id');
+      var row = transactionTable.row($(this)).data();
+
+      var inputOptionsPromise = new Promise(function (resolve) {
+        setTimeout(function () {
+          resolve({
+            'delete': 'Delete transaction'
+          })
+        }, 1000)
+      })
+
+
+         Swal.fire({
+            input: 'select',
+            inputOptions: inputOptionsPromise,
+            inputPlaceholder: 'Select an option',
+            title: 'Options',
+            showConfirmButton: true,
+            showCancelButton: true,
+            confirmButtonText: 'Confirm',
+            html:
+                '<div class="col-md-12 text-start mb-3">TXN #: ' + id + '</div>' +
+                '<div class="col-md-12 text-start">Name: ' + row[0] + '</div>' +
+                '<div class="col-md-12 text-start">Qty: ' + row[1] + '</div>' +
+                '<div class="col-md-12 text-start">Status: ' + row[2] + '</div>' +
+                '<div class="col-md-12 text-start">Date: ' + row[3] + '</div>'
+         }).then((result) => {
+            if (result.isConfirmed) {
+               if (result.value === "delete") {
+                  Swal.fire({
+                     title: 'Are you sure?',
+                     text: "You won't be able to revert this!",
+                     icon: 'warning',
+                     showCancelButton: true,
+                     confirmButtonColor: '#3085d6',
+                     cancelButtonColor: '#d33',
+                     confirmButtonText: 'Yes, delete it!'
+                  }).then((result) => {
+                     if (result.isConfirmed) {
+                        $.ajax({
+                           type: 'DELETE',   
+                           url: "/inventories/" + id,
+                           data:   
+                           {
+                               "_token": "{{ csrf_token() }}"
+                           },
+                           success: function (response) {
+                              Swal.fire(
+                                 'Deleted!',
+                                 'Transaction has been deleted.',
+                                 'success'
+                              ).then((result) => {
+                                 if (result.isConfirmed) {
+                                    location.reload();
+                                 }
+                              });
+                           }
+                        });
+                     }
+                  })
+               }
+            }
+         });
+
+   });
 });
 </script>
 @endsection
