@@ -6,23 +6,24 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
 
-class SaleController extends Controller
+class ServiceController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
     public function index()
     {
-        $sales = [];
-        $current = [];
-        $transactions = [];
+        $services = [];
+        $currencies = [
+            'PHP' => '₱'
+        ];
 
         $res = Http::withHeaders([
                     'Accept' => 'application/json'
                 ])->replaceHeaders([
                     'Content-Type' => 'application/json'
                 ])->withToken($this->user->token)
-                ->get(env('ENDPOINT_HOST') . '/api/sales');
+                ->get(env('ENDPOINT_HOST') . '/api/services');
 
         if ($res->json('success') !== null && $res->json('success')) {
             $last_page = $res->json('data')['last_page'];
@@ -35,39 +36,20 @@ class SaleController extends Controller
                         ])->replaceHeaders([
                             'Content-Type' => 'application/json'
                         ])->withToken($this->user->token)
-                        ->get(env('ENDPOINT_HOST') . '/api/sales?page=' . $current_page);
+                        ->get(env('ENDPOINT_HOST') . '/api/services?page=' . $current_page);
 
                 foreach ($response->json('data')['data'] as $key => $value) {
-                    array_push($sales, $value);
+                    array_push($services, $value);
                 }
 
                 $current_page++;
             }
-
-            foreach ($sales as $key => $value) {
-                $itemName = $value["item"]["name"];
-
-                $current[$itemName]['name'] = $itemName;
-                $current[$itemName]['qty'] = $value["item"]["qty"];
-                $current[$itemName]['unit'] = $value["item"]["unit"];
-                $current[$itemName]['price'] = $value["item"]["price"];
-                $current[$itemName]['amount'] = $value["amount"];
-            }
         }
 
-        return view('sections.sale.index', [
-            'sales' => $sales,
-            'current' => json_encode($current),
-            'transactions' => json_encode($transactions)
+        return view('sections.service.index', [
+            'services' => json_encode($services),
+            'currencies' => $currencies
         ]);
-    }
-
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
     }
 
     /**
@@ -75,23 +57,21 @@ class SaleController extends Controller
      */
     public function store(Request $request)
     {
-        //
-    }
+        $params = [
+            "user_id" => $this->user->id,
+            "long_name" => ucfirst($request->long_name),
+            "short_name" => ucfirst($request->short_name),
+            "category" => ucfirst($request->category)
+        ];
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
-    {
-        //
+        $response = Http::withHeaders([
+                'Accept' => 'application/json'
+            ])->replaceHeaders([
+                'Content-Type' => 'application/json'
+            ])->withBody(
+                json_encode($params)
+            )->withToken($this->user->token)
+            ->post(env('ENDPOINT_HOST') . '/api/services');
     }
 
     /**

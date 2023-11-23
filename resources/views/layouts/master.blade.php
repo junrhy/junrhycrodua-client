@@ -43,6 +43,22 @@
         background: #393c44;
         min-height: 100vh;
     }
+
+    .excellent {
+      background-color: #ccffe5 !important;
+    }
+
+    .good {
+      background-color: #e5fff2 !important;
+    }
+
+    .fair {
+      background-color: #fff2e5 !important;
+    }
+
+    .poor {
+      background-color: #ffe5e5 !important;
+    }
   </style>
 </head>
 <body>

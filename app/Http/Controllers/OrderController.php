@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Str;
 
 class OrderController extends Controller
 {
@@ -11,10 +13,52 @@ class OrderController extends Controller
      */
     public function index()
     {
-        $orders = ['test'];
+        $orders = [];
+        $pendings = [];
+        $completed = [];
+
+        $res = Http::withHeaders([
+                    'Accept' => 'application/json'
+                ])->replaceHeaders([
+                    'Content-Type' => 'application/json'
+                ])->withToken($this->user->token)
+                ->get(env('ENDPOINT_HOST') . '/api/orders');
+
+        if ($res->json('success') !== null && $res->json('success')) {
+            $last_page = $res->json('data')['last_page'];
+
+            $current_page = 1;
+
+            while ($current_page < $last_page + 1) {
+                $response = Http::withHeaders([
+                            'Accept' => 'application/json'
+                        ])->replaceHeaders([
+                            'Content-Type' => 'application/json'
+                        ])->withToken($this->user->token)
+                        ->get(env('ENDPOINT_HOST') . '/api/orders?page=' . $current_page);
+
+                foreach ($response->json('data')['data'] as $key => $value) {
+                    array_push($sales, $value);
+                }
+
+                $current_page++;
+            }
+
+            foreach ($sales as $key => $value) {
+                $itemName = $value["item"]["name"];
+
+                // $pendings[$itemName]['name'] = $itemName;
+                // $pendings[$itemName]['qty'] = $value["item"]["qty"];
+                // $pendings[$itemName]['unit'] = $value["item"]["unit"];
+                // $pendings[$itemName]['price'] = $value["item"]["price"];
+                // $pendings[$itemName]['amount'] = $value["amount"];
+            }
+        }
 
         return view('sections.order.index', [
-            'orders' => $orders
+            'orders' => $orders,
+            'pendings' => json_encode($pendings),
+            'completed' => json_encode($completed)
         ]);
     }
 

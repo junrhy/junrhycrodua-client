@@ -1,5 +1,5 @@
 @extends('layouts.master')
 
 @section('content')
-Dashboard
+Dashboard {{ $user->name }}
 @endsection

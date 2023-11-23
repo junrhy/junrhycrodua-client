@@ -35,6 +35,8 @@
   <div class="nav-item"><i class="fa fa-list"></i> <a href="/orders">Orders</a></div>
   <div class="nav-item"><i class="fa fa-cash-register"></i> <a href="/sales">Sales</a></div>
   <div class="nav-item"><i class="fa fa-box"></i> <a href="/inventories">Inventory</a></div>
+  <div class="nav-item"><i class="fa fa-box-open"></i> <a href="/products">Products</a></div>
+  <div class="nav-item"><i class="fa fa-user-check"></i> <a href="/services">Services</a></div>
 </div>
 <div class="footer">
   <div class="nav-item"><i class="fa fa-user"></i> <span id="profile">Profile</span></div>
